@@ -1,0 +1,32 @@
+version: "3"
+
+include:
+  - path: ../common/watchtower/compose.yaml
+  - path: ../common/portainer/compose.yaml
+  - path: ../common/acme.sh/compose.yaml
+
+services:
+  radius:
+    image: freeradius/freeradius-server:latest-alpine
+    restart: unless-stopped
+    ports:
+      - "1812-1813:1812-1813/udp"
+    volumes:
+      - raddb:/opt/etc/raddb
+    command: "/bin/sh -c 'apk add mariadb-connector-c; exec radiusd -tfxPl stdout'"
+    labels:
+      - "sh.acme.autoload.domain=radius"
+
+  radius-web:
+    build: https://github.com/lirantal/daloradius.git
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    environment:
+      - MYSQL_HOST=${DALO_DB_HOST:?DALO_DB_HOST environment variable is required}
+      - MYSQL_PORT=${DALO_DB_PORT:-3306}
+      - MYSQL_DATABASE=${DALO_DB_NAME:-radius}
+      - MYSQL_USER=${DALO_DB_USER:-radius}
+      - MYSQL_PASSWORD=${DALO_DB_PASS:-radpass}
+volumes:
+  raddb:
