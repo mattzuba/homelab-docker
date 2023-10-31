@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  cloudflared-tunnel: &cloudflared
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    volumes:
+      - cloudflared_data:/home/nonroot/.cloudflared
+      - type: bind
+        source: ${CF_CONFIG}
+        target: /home/nonroot/.cloudflared/config.yml
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+
+  cloudflared-login:
+    <<: *cloudflared
+    restart: no
+    profiles:
+      - donotrun
+    command: tunnel login
+    depends_on:
+      cloudflared-vol-ownership:
+        condition: service_completed_successfully
+
+  cloudflared-create:
+    <<: *cloudflared
+    restart: no
+    profiles:
+      - donotrun
+    command: tunnel create ${CF_TUNNEL_NAME:?CF_TUNNEL_NAME is a required variable}
+
+  cloudflared-route:
+    <<: *cloudflared
+    restart: no
+    profiles:
+      - donotrun
+    command: tunnel route dns --overwrite-dns ${CF_TUNNEL_NAME:?CF_TUNNEL_NAME is a required variable} ${CF_TUNNEL_HOST:?CF_TUNNEL_HOST is a required variable}
+
+  cloudflared-delete:
+    <<: *cloudflared
+    restart: no
+    profiles:
+      - donotrun
+    command: tunnel delete ${CF_TUNNEL_NAME:?CF_TUNNEL_NAME is a required variable}
+
+  # Thanks Docker!
+  # https://pratikpc.medium.com/use-docker-compose-named-volumes-as-non-root-within-your-containers-1911eb30f731
+  cloudflared-vol-ownership:
+    image: busybox:latest
+    profiles:
+      - donotrun
+    volumes:
+      - cloudflared_data:/home/nonroot/.cloudflared
+    command: chown -vcR 65532:65532 /home/nonroot/.cloudflared
+
+volumes:
+  cloudflared_data:
