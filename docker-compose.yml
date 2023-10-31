@@ -4,7 +4,7 @@ services:
   vaultwarden:
     image: vaultwarden/server:latest
     profiles:
-      - tunnel
+      - vaultwarden
     networks:
       vaultwarden:
     restart: always
@@ -16,23 +16,25 @@ services:
       WEBSOCKET_ENABLED: ${VW_WEBSOCKET_ENABLED:-true}
       ROCKET_LIMITS: ${VW_ROCKET_LIMITS:-{json=10485760}}
       ROCKET_WORKERS: ${VW_ROCKET_WORKERS:-10}
-      SMTP_HOST: ${VW_SMTP_HOST}
-      SMTP_FROM: ${VW_SMTP_FROM}
-      SMTP_PORT: ${VW_SMTP_PORT:-587}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_FROM: ${SMTP_FROM}
+      SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURITY: ${VW_SMTP_SECURITY:-starttls}
-      SMTP_USERNAME: ${VW_SMTP_USERNAME}
-      SMTP_PASSWORD: ${VW_SMTP_PASSWORD}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
       SHOW_PASSWORD_HINT: ${VW_SHOW_PASSWORD_HINT:-true}
       EXTENDED_LOGGING: ${VW_EXTENDED_LOGGING:-false}
       LOG_LEVEL: ${VW_LOG_LEVEL:-info}
       IP_HEADER: X-Forwarded-For
     volumes:
       - vw_data:/data
+    labels:
+      - "com.centurylinklabs.watchtower.scope=vaultwarden"
       
   cloudflared-tunnel: &cloudflared
     image: cloudflare/cloudflared:latest
     profiles:
-      - tunnel
+      - vaultwarden
     networks:
       vaultwarden:
     restart: always
@@ -42,6 +44,8 @@ services:
       - type: bind
         source: ./cloudflared.yml
         target: /home/nonroot/.cloudflared/config.yml
+    labels:
+      - "com.centurylinklabs.watchtower.scope=vaultwarden"
 
   cloudflared-login:
     <<: *cloudflared
@@ -86,13 +90,27 @@ services:
       - cloudflared_data:/home/nonroot/.cloudflared
     command: chown -vcR 65532:65532 /home/nonroot/.cloudflared
 
+  watchtower:
+    image: containrrr/watchtower:latest
+    networks:
+      vaultwarden:
+    profiles:
+      - vaultwarden
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 300
+      WATCHTOWER_SCOPE: vaultwarden
+      WATCHTOWER_NOTIFICATION_URL: smtp://${SMTP_USERNAME}:${SMTP_PASSWORD}@${SMTP_HOST}:${SMTP_PORT}/?from=${SMTP_FROM}&to=${WT_NOTIFY_EMAIL}
+      WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${CF_TUNNEL_HOST}
+      WATCHTOWER_MONITOR_ONLY: ${WT_MONITOR_ONLY:-false}
+      WATCHTOWER_NO_STARTUP_MESSAGE: ${WT_NO_STARTUP_MESSAGE:-false}
+    labels:
+      - "com.centurylinklabs.watchtower.scope=vaultwarden"
+      
 volumes:
   vw_data:
   cloudflared_data:
   
 networks:
   vaultwarden:
-    ipam:
-      config:
-        - subnet: 172.31.0.0/24
-          gateway: 172.31.0.1
