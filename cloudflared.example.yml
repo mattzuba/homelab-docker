@@ -1,5 +1,6 @@
 tunnel: <your-tunnel-id>
 credentials-file: /home/nonroot/.cloudflared/<your-tunnel-id>.json
+protocol: quic
 
 ingress:
   - hostname: vault.your.tld
