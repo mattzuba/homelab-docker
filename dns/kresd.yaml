@@ -1,0 +1,15 @@
+network:
+  do-ipv6: false
+  listen:
+    - interface: eth0@53
+cache:
+  size-max: 100M
+  ttl-min: 3600s
+  prediction:
+    window: 30m
+    period: 24
+  prefill:
+    - origin: "."
+      url: https://c.internic.net/domain/root.zone
+options:
+  serve-stale: true
