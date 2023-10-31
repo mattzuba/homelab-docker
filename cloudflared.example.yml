@@ -1,0 +1,10 @@
+tunnel: <your-tunnel-id>
+credentials-file: /home/nonroot/.cloudflared/<your-tunnel-id>.json
+
+ingress:
+  - hostname: vault.your.tld
+    path: /notifications/hub
+    service: ws://vaultwarden:3012
+  - hostname: vault.your.tld
+    service: http://vaultwarden
+  - service: http_status:404
