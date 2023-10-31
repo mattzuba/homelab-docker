@@ -5,7 +5,7 @@ protocol: quic
 ingress:
   - hostname: vault.your.tld
     path: /notifications/hub
-    service: ws://vaultwarden:3012
+    service: ws://vaultwarden:80
   - hostname: vault.your.tld
     service: http://vaultwarden
   - service: http_status:404
