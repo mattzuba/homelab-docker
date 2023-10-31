@@ -1,0 +1,19 @@
+version: '3'
+
+include:
+  - path: ../common/watchtower/compose.yaml
+  - path: ../common/portainer/compose.yaml
+  - path: ../common/cloudflare/compose.yaml
+
+services:
+  ntfy:
+    image: binwiederhier/ntfy:latest
+    restart: unless-stopped
+    command: serve
+    volumes:
+      - ntfy_cache:/var/cache/ntfy
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+
+volumes:
+  ntfy_cache:

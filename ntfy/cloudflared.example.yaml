@@ -1,0 +1,8 @@
+tunnel: tunnel-id
+credentials-file: /home/nonroot/.cloudflared/tunnel-id.json
+protocol: quic
+
+ingress:
+  - hostname: ntfy.your.tld
+    service: http://ntfy
+  - service: http_status:404
