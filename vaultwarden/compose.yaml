@@ -1,0 +1,39 @@
+version: '3'
+
+include:
+  - path: ../common/watchtower/compose.yaml
+  - path: ../common/portainer/compose.yaml
+  - path: ../common/cloudflare/compose.yaml
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${VW_DOMAIN}
+      SIGNUPS_ALLOWED: ${VW_SIGNUPS_ALLOWED:-false}
+      INVITATIONS_ALLOWED: ${VW_INVITATIONS_ALLOWED:-true}
+      ADMIN_TOKEN: ${VW_ADMIN_TOKEN}
+      ROCKET_LIMITS: ${VW_ROCKET_LIMITS:-{json=10485760}}
+      ROCKET_WORKERS: ${VW_ROCKET_WORKERS:-10}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_FROM: ${SMTP_FROM}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURITY: ${VW_SMTP_SECURITY:-starttls}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SHOW_PASSWORD_HINT: ${VW_SHOW_PASSWORD_HINT:-true}
+      EXTENDED_LOGGING: ${VW_EXTENDED_LOGGING:-false}
+      LOG_LEVEL: ${VW_LOG_LEVEL:-info}
+      IP_HEADER: X-Forwarded-For
+    volumes:
+      - vw_data:/data
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+
+volumes:
+  vw_data:
+
+networks:
+  default:
+    name: vaultwarden
