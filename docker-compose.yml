@@ -13,7 +13,6 @@ services:
       SIGNUPS_ALLOWED: ${VW_SIGNUPS_ALLOWED:-false}
       INVITATIONS_ALLOWED: ${VW_INVITATIONS_ALLOWED:-true}
       ADMIN_TOKEN: ${VW_ADMIN_TOKEN}
-      WEBSOCKET_ENABLED: ${VW_WEBSOCKET_ENABLED:-true}
       ROCKET_LIMITS: ${VW_ROCKET_LIMITS:-{json=10485760}}
       ROCKET_WORKERS: ${VW_ROCKET_WORKERS:-10}
       SMTP_HOST: ${SMTP_HOST}
@@ -30,7 +29,7 @@ services:
       - vw_data:/data
     labels:
       - "com.centurylinklabs.watchtower.scope=vaultwarden"
-      
+
   cloudflared-tunnel: &cloudflared
     image: cloudflare/cloudflared:latest
     profiles:
@@ -56,21 +55,21 @@ services:
     depends_on:
       cloudflared-vol-ownership:
         condition: service_completed_successfully
-  
+
   cloudflared-create:
     <<: *cloudflared
     restart: never
     profiles:
       - donotrun
     command: tunnel create ${CF_TUNNEL_NAME}
-  
+
   cloudflared-route:
     <<: *cloudflared
     restart: never
     profiles:
       - donotrun
     command: tunnel route dns --overwrite-dns ${CF_TUNNEL_NAME} ${CF_TUNNEL_HOST}
-    
+
   cloudflared-delete:
     <<: *cloudflared
     restart: never
