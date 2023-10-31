@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_SCOPE: ${WATCHTOWER_SCOPE}
+      WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${WATCHTOWER_HOSTNAME}
+    env_file: .env
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
