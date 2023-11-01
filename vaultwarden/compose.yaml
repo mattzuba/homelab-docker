@@ -29,7 +29,7 @@ services:
     volumes:
       - vw_data:/data
     labels:
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
 volumes:
   vw_data:

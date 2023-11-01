@@ -13,9 +13,9 @@ services:
       - "1812-1813:1812-1813/udp"
     volumes:
       - raddb:/opt/etc/raddb
-    command: "/bin/sh -c 'apk add mariadb-connector-c; exec radiusd -tfxPl stdout'"
+    command: /bin/sh -c 'apk add mariadb-connector-c; exec radiusd -tfxPl stdout'
     labels:
-      - "sh.acme.autoload.domain=radius"
+      - sh.acme.autoload.domain=radius
 
   radius-web:
     build: https://github.com/lirantal/daloradius.git
@@ -28,5 +28,6 @@ services:
       - MYSQL_DATABASE=${DALO_DB_NAME:-radius}
       - MYSQL_USER=${DALO_DB_USER:-radius}
       - MYSQL_PASSWORD=${DALO_DB_PASS:-radpass}
+
 volumes:
   raddb:

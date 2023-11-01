@@ -11,7 +11,7 @@ services:
         source: ${CF_CONFIG}
         target: /home/nonroot/.cloudflared/config.yml
     labels:
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
   cloudflared-login:
     <<: *cloudflared

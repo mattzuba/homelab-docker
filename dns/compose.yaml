@@ -26,8 +26,8 @@ services:
       - adguard_work:/opt/adguardhome/work
       - adguard_conf:/opt/adguardhome/conf
     labels:
-      - "sh.acme.autoload.domain=dns"
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - sh.acme.autoload.domain=dns
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
   kresd:
     image: cznic/knot-resolver:6
@@ -36,7 +36,7 @@ services:
       - kresd_cache:/var/cache/knot-resolver
       - ./kresd.yaml:/config/config.yaml
     labels:
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
 volumes:
   adguard_work:

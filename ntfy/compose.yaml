@@ -13,7 +13,7 @@ services:
     volumes:
       - ntfy_cache:/var/cache/ntfy
     labels:
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
 volumes:
   ntfy_cache:

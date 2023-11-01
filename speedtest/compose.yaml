@@ -12,8 +12,8 @@ services:
     ports:
       - "8443:3001"
     labels:
-      - "sh.acme.autoload.domain=speed"
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - sh.acme.autoload.domain=speed
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
   iperf3:
     image: networkstatic/iperf3:latest
@@ -22,8 +22,8 @@ services:
       - "5201:5201/udp"
       - "5201:5201/tcp"
     labels:
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
-    command: '-s'
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+    command: -s
 
 networks:
   default:

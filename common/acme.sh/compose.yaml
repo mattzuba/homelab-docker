@@ -3,14 +3,14 @@ version: '3'
 services:
   acme.sh:
     image: neilpang/acme.sh:latest
-    command: daemon
     restart: unless-stopped
+    command: daemon
+    env_file: .env
     volumes:
       - acme.sh_data:/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock
-    env_file: .env
     labels:
-      - "com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}"
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
 volumes:
   acme.sh_data:
