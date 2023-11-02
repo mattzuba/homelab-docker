@@ -5,9 +5,10 @@ services:
     image: containrrr/watchtower:latest
     restart: unless-stopped
     env_file: .env
+    hostname: watchtower.${HOSTNAME:?Set the HOSTNAME .env variable}
     environment:
       WATCHTOWER_SCOPE: ${WATCHTOWER_SCOPE}
-      WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${WATCHTOWER_HOSTNAME}
+      WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:

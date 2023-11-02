@@ -9,6 +9,7 @@ services:
   radius:
     image: freeradius/freeradius-server:latest-alpine
     restart: unless-stopped
+    hostname: radius.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
       - "1812-1813:1812-1813/udp"
     volumes:
@@ -20,6 +21,7 @@ services:
   radius-web:
     build: https://github.com/lirantal/daloradius.git
     restart: unless-stopped
+    hostname: radius-web.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
       - 8000:8000
     environment:

@@ -9,6 +9,7 @@ services:
   vaultwarden:
     image: vaultwarden/server:latest
     restart: unless-stopped
+    hostname: vaultwarden.${HOSTNAME:?Set the HOSTNAME .env variable}
     environment:
       DOMAIN: ${VW_DOMAIN}
       SIGNUPS_ALLOWED: ${VW_SIGNUPS_ALLOWED:-false}

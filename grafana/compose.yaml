@@ -9,6 +9,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     restart: unless-stopped
+    hostname: grafana.${HOSTNAME:?Set the HOSTNAME .env variable}
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     ports:
@@ -23,6 +24,7 @@ services:
     image: grafana/loki:latest
     restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml -reporting.enabled=false
+    hostname: loki.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
       - "3100:3100"
     volumes:
@@ -35,6 +37,7 @@ services:
     image: grafana/promtail:latest
     restart: unless-stopped
     command: -config.file=/etc/promtail/promtail.yaml -config.expand-env=true
+    hostname: promtail.${HOSTNAME:?Set the HOSTNAME .env variable}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./promtail.yaml:/etc/promtail/promtail.yaml
@@ -44,6 +47,7 @@ services:
   syslog:
     image: balabit/syslog-ng:latest
     restart: unless-stopped
+    hostname: syslog.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
       - "514:514/udp"
       - "514:514/tcp"

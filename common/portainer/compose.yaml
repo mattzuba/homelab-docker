@@ -4,6 +4,7 @@ services:
   portainer:
     image: portainer/agent:latest
     restart: unless-stopped
+    hostname: portainer.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
       - "9001:9001"
     volumes:

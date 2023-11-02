@@ -5,6 +5,7 @@ services:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     command: tunnel run
+    hostname: cloudflared.${HOSTNAME:?Set the HOSTNAME .env variable}
     volumes:
       - cloudflared_data:/home/nonroot/.cloudflared
       - type: bind

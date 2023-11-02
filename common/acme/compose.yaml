@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     command: daemon
     env_file: .env
+    hostname: acme.${HOSTNAME:?Set the HOSTNAME .env variable}
     volumes:
       - acme_data:/acme.sh
       - acme_certs:/opt/ssl
