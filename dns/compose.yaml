@@ -3,7 +3,7 @@ version: "3"
 include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
-  - path: ../common/acme.sh/compose.yaml
+  - path: ../common/acme/compose.yaml
 
 services:
   adguard:
@@ -25,6 +25,7 @@ services:
     volumes:
       - adguard_work:/opt/adguardhome/work
       - adguard_conf:/opt/adguardhome/conf
+      - acme_certs:/opt/ssl
     labels:
       - sh.acme.autoload.domain=dns
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}

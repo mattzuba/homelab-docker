@@ -1,6 +1,6 @@
 ## Intro
 
-This is a Docker Compose setup to use Vaultwarden with a locally configured Cloudflared tunnel which allows websockets to work correctly.  Also includes Watchtower to keep Cloudflared and Vaultwarden up to date.  Can be disabled by setting the `WT_MONITOR_ONLY` environment variable to `true` in `.env`.
+This is a Docker Compose setup to use Vaultwarden with a locally configured Cloudflared tunnel which allows websockets to work correctly.  Also includes Watchtower and Portainer.
 
 ## Prereqs
 
