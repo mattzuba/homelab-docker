@@ -4,6 +4,7 @@ include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
   - path: ../common/acme/compose.yaml
+  - path: ../common/promtail/compose.yaml
 
 services:
   radius:
@@ -17,6 +18,8 @@ services:
     command: /bin/sh -c 'apk add mariadb-connector-c; exec radiusd -tfxPl stdout'
     labels:
       - sh.acme.autoload.domain=radius
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
 
   radius-web:
     build: https://github.com/lirantal/daloradius.git
@@ -30,6 +33,9 @@ services:
       - MYSQL_DATABASE=${DALO_DB_NAME:-radius}
       - MYSQL_USER=${DALO_DB_USER:-radius}
       - MYSQL_PASSWORD=${DALO_DB_PASS:-radpass}
+    labels:
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
 
 volumes:
   raddb:

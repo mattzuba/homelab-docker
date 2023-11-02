@@ -4,6 +4,7 @@ include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
   - path: ../common/acme/compose.yaml
+  - path: ../common/promtail/compose.yaml
 
 services:
   adguard:
@@ -30,6 +31,7 @@ services:
     labels:
       - sh.acme.autoload.domain=dns
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
 
   kresd:
     image: cznic/knot-resolver:6
@@ -40,6 +42,7 @@ services:
       - ./kresd.yaml:/config/config.yaml
     labels:
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
 
 volumes:
   adguard_work:

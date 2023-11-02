@@ -4,6 +4,7 @@ include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
   - path: ../common/cloudflare/compose.yaml
+  - path: ../common/promtail/compose.yaml
 
 services:
   vaultwarden:
@@ -31,6 +32,7 @@ services:
       - vw_data:/data
     labels:
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
 
 volumes:
   vw_data:

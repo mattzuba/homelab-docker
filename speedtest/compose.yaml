@@ -4,6 +4,7 @@ include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
   - path: ../common/acme/compose.yaml
+  - path: ../common/promtail/compose.yaml
 
 services:
   speedtest:
@@ -11,13 +12,15 @@ services:
     restart: unless-stopped
     hostname: speedtest.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
-      - "8443:3001"
+      - "443:3001"
     labels:
       - sh.acme.autoload.domain=speed
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
 
   iperf3:
     image: networkstatic/iperf3:latest
+    command: -s
     restart: unless-stopped
     hostname: iperf3.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
@@ -25,7 +28,7 @@ services:
       - "5201:5201/tcp"
     labels:
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
-    command: -s
+      - com.grafana.promtail=true
 
 networks:
   default:

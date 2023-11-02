@@ -12,3 +12,4 @@ services:
       - ./promtail.yaml:/etc/promtail/promtail.yaml
     labels:
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
