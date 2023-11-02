@@ -8,9 +8,11 @@ services:
     env_file: .env
     volumes:
       - acme.sh_data:/acme.sh
+      - acme.sh_certs:/opt/ssl
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
 volumes:
   acme.sh_data:
+  acme.sh_certs:

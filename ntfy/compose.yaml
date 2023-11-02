@@ -1,19 +1,27 @@
 version: '3'
 
 include:
-  - path: ../common/watchtower/compose.yaml
-  - path: ../common/portainer/compose.yaml
+  - path: ../common/acme.sh/compose.yaml
   - path: ../common/cloudflare/compose.yaml
+  - path: ../common/portainer/compose.yaml
+  - path: ../common/watchtower/compose.yaml
 
 services:
   ntfy:
     image: binwiederhier/ntfy:latest
     restart: unless-stopped
     command: serve
+    ports:
+      - "9090:9090"
     volumes:
+      - ./ntfy.yaml:/etc/ntfy/server.yml
       - ntfy_cache:/var/cache/ntfy
+      - ntfy_data:/var/lib/ntfy
+      - acme.sh_certs:/opt/ssl
     labels:
+      - sh.acme.autoload.domain=ntfy
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
 
 volumes:
   ntfy_cache:
+  ntfy_data:
