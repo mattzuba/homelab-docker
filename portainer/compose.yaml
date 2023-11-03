@@ -1,0 +1,26 @@
+version: "3"
+
+include:
+  - path: ../common/watchtower/compose.yaml
+  - path: ../common/acme/compose.yaml
+  - path: ../common/promtail/compose.yaml
+
+services:
+  portainer:
+    image: portainer/portainer-ce:alpine
+    command: --sslcert /opt/ssl/portainer.crt --sslkey /opt/ssl/portainer.key
+    restart: unless-stopped
+    hostname: portainer.${HOSTNAME:?Set the HOSTNAME .env variable}
+    ports:
+      - "443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+      - acme_certs:/opt/ssl
+    labels:
+      - sh.acme.autoload.domain=portainer
+      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.grafana.promtail=true
+
+volumes:
+  portainer_data:
