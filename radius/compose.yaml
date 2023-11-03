@@ -18,7 +18,7 @@ services:
     command: /bin/sh -c 'apk add mariadb-connector-c; exec radiusd -tfxPl stdout'
     labels:
       - sh.acme.autoload.domain=radius
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
   radius-web:
@@ -34,7 +34,7 @@ services:
       - MYSQL_USER=${DALO_DB_USER:-radius}
       - MYSQL_PASSWORD=${DALO_DB_PASS:-radpass}
     labels:
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
 volumes:

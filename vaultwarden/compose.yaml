@@ -31,7 +31,7 @@ services:
     volumes:
       - vw_data:/data
     labels:
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
 volumes:

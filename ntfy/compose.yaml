@@ -22,7 +22,7 @@ services:
       - acme_certs:/opt/ssl
     labels:
       - sh.acme.autoload.domain=ntfy
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
 volumes:

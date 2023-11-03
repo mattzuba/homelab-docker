@@ -30,7 +30,7 @@ services:
       - acme_certs:/opt/ssl
     labels:
       - sh.acme.autoload.domain=dns
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
   kresd:
@@ -41,7 +41,7 @@ services:
       - kresd_cache:/var/cache/knot-resolver
       - ./kresd.yaml:/config/config.yaml
     labels:
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
 volumes:

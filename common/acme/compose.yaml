@@ -12,7 +12,7 @@ services:
       - acme_certs:/opt/ssl
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.grafana.promtail=true
 
 volumes:
