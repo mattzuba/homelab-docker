@@ -6,11 +6,11 @@ services:
     restart: unless-stopped
     command: tunnel run
     hostname: cloudflared.${HOSTNAME:?Set the HOSTNAME .env variable}
+    ports:
+      - "9090:9090"
     volumes:
       - cloudflared_data:/home/nonroot/.cloudflared
-      - type: bind
-        source: ${CF_CONFIG}
-        target: /home/nonroot/.cloudflared/config.yml
+      - ${PWD}/cloudflared.yaml:/home/nonroot/.cloudflared/config.yml
     labels:
       - com.centurylinklabs.watchtower.scope=${WATCHTOWER_SCOPE}
       - com.grafana.promtail=true
@@ -45,6 +45,16 @@ services:
     profiles:
       - donotrun
     command: tunnel delete ${CF_TUNNEL_NAME:?CF_TUNNEL_NAME is a required variable}
+
+  cloudflared-validate:
+    <<: *cloudflared
+    restart: no
+    profiles:
+      - donotrun
+    command: tunnel ingress validate
+    depends_on:
+      cloudflared-vol-ownership:
+        condition: service_completed_successfully
 
   # Thanks Docker!
   # https://pratikpc.medium.com/use-docker-compose-named-volumes-as-non-root-within-your-containers-1911eb30f731
