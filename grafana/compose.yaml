@@ -12,13 +12,21 @@ services:
     hostname: grafana.${HOSTNAME:?Set the HOSTNAME .env variable}
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SERVER_DOMAIN=${HOSTNAME}
+      - GF_SERVER_ROOT_URL=https://${HOSTNAME}
+      - GF_SERVER_CERT_KEY=/opt/ssl/grafana.key
+      - GF_SERVER_CERT_FILE=/opt/ssl/grafana.crt
+      - GF_SERVER_PROTOCOL=https
+      - GF_SERVER_ENFORCE_DOMAIN=false
     ports:
       - "3000:3000"
     volumes:
       - grafana_storage:/var/lib/grafana
+      - acme_certs:/opt/ssl
       - ./loki_ds.yaml:/etc/grafana/provisioning/datasources/loki_ds.yaml
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+      - sh.acme.autoload.domain=grafana
 
   loki:
     image: grafana/loki:latest
