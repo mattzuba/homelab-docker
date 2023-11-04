@@ -14,7 +14,7 @@ services:
     command: serve
     hostname: ntfy.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./ntfy.yaml:/etc/ntfy/server.yml
       - ntfy_cache:/var/cache/ntfy
