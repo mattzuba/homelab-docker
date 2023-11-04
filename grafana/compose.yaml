@@ -19,7 +19,7 @@ services:
       - GF_SERVER_PROTOCOL=https
       - GF_SERVER_ENFORCE_DOMAIN=false
     ports:
-      - "3000:3000"
+      - "443:3000"
     volumes:
       - grafana_storage:/var/lib/grafana
       - acme_certs:/opt/ssl
