@@ -2,6 +2,8 @@ network:
   do-ipv6: false
   listen:
     - interface: eth0@53
+management:
+  interface: 0.0.0.0@5000
 cache:
   size-max: 100M
   ttl-min: 3600s
@@ -10,6 +12,8 @@ cache:
     period: 24
   prefill:
     - origin: "."
-      url: https://c.internic.net/domain/root.zone
+      url: https://www.internic.net/domain/root.zone
 options:
   serve-stale: true
+logging:
+  level: info
