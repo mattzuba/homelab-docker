@@ -37,6 +37,9 @@ services:
     image: cznic/knot-resolver:6
     restart: unless-stopped
     hostname: kresd.${HOSTNAME:?Set the HOSTNAME .env variable}
+    dns:
+      - 9.9.9.9
+      - 1.1.1.1
     ports:
       - "5000:5000"
     volumes:
