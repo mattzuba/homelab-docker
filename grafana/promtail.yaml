@@ -42,3 +42,18 @@ scrape_configs:
         target_label: logstream
       - source_labels: ['__meta_docker_container_label_logging_jobname']
         target_label: job
+  - job_name: gelf
+    gelf:
+      listen_address: 0.0.0.0:12201
+      labels:
+        job: gelf
+    relabel_configs:
+      - source_labels: ['__gelf_message_level']
+        target_label: level
+      - source_labels: ['__gelf_message_host']
+        target_label: host
+      - source_labels: ['__gelf_message_host']
+        target_label: hostname
+      - source_labels: ['__gelf_message_facility']
+        target_label: facility
+

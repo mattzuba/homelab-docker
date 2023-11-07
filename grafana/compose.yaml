@@ -46,6 +46,8 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/promtail/promtail.yaml -config.expand-env=true
     hostname: promtail.${HOSTNAME:?Set the HOSTNAME .env variable}
+    ports:
+      - "12201:12201/udp"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./promtail.yaml:/etc/promtail/promtail.yaml
