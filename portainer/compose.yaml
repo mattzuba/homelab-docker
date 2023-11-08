@@ -3,7 +3,6 @@ version: "3"
 include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/acme/compose.yaml
-  - path: ../common/promtail/compose.yaml
 
 services:
   portainer:
@@ -20,7 +19,6 @@ services:
     labels:
       - sh.acme.autoload.domain=portainer
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
 volumes:
   portainer_data:

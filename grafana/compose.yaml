@@ -39,7 +39,6 @@ services:
       - loki_data:/loki
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
   promtail:
     image: grafana/promtail:latest

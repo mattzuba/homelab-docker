@@ -3,7 +3,6 @@ version: "3"
 include:
   - path: ../common/portainer/compose.yaml
   - path: ../common/watchtower/compose.yaml
-  - path: ../common/promtail/compose.yaml
 
 services:
   influx:
@@ -22,7 +21,6 @@ services:
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET:?Influx Init Bucket is required}
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
 volumes:
   influx_data:

@@ -5,7 +5,6 @@ include:
   - path: ../common/cloudflare/compose.yaml
   - path: ../common/portainer/compose.yaml
   - path: ../common/watchtower/compose.yaml
-  - path: ../common/promtail/compose.yaml
 
 services:
   ntfy:
@@ -24,7 +23,6 @@ services:
     labels:
       - sh.acme.autoload.domain=ntfy
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
 volumes:
   ntfy_cache:

@@ -4,7 +4,6 @@ include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
   - path: ../common/acme/compose.yaml
-  - path: ../common/promtail/compose.yaml
 
 services:
   speedtest:
@@ -16,7 +15,6 @@ services:
     labels:
       - sh.acme.autoload.domain=speed
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
   iperf3:
     image: networkstatic/iperf3:latest
@@ -28,7 +26,6 @@ services:
       - "5201:5201/tcp"
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
 networks:
   default:

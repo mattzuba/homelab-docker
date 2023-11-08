@@ -13,7 +13,6 @@ services:
       - ${PWD}/cloudflared.yaml:/home/nonroot/.cloudflared/config.yml
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-      - com.grafana.promtail=true
 
   cloudflared-login:
     <<: *cloudflared
