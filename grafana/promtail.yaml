@@ -17,8 +17,6 @@ scrape_configs:
     relabel_configs:
       - source_labels: ['__syslog_message_hostname']
         target_label: host
-      - source_labels: ['__syslog_message_hostname']
-        target_label: hostname
       - source_labels: ['__syslog_message_severity']
         target_label: level
       - source_labels: ['__syslog_message_app_name']
@@ -47,13 +45,23 @@ scrape_configs:
       listen_address: 0.0.0.0:12201
       labels:
         job: gelf
+    pipeline_stages:
+      - match:
+          selector: '{job="gelf"}'
+          stages:
+            - json:
+                expressions:
+                  container: _container_name
+                  message: short_message
+            - labels:
+                container:
+            - output:
+                source: message
     relabel_configs:
       - source_labels: ['__gelf_message_level']
         target_label: level
       - source_labels: ['__gelf_message_host']
         target_label: host
-      - source_labels: ['__gelf_message_host']
-        target_label: hostname
       - source_labels: ['__gelf_message_facility']
         target_label: facility
 
