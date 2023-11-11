@@ -10,6 +10,7 @@ services:
     volumes:
       - acme_data:/acme.sh
       - acme_certs:/opt/ssl
+      - acme_ssh:/root/.ssh
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
@@ -17,3 +18,4 @@ services:
 volumes:
   acme_data:
   acme_certs:
+  acme_ssh:
