@@ -21,6 +21,7 @@ echo '0 2 * * * /usr/sbin/apk-autoupdate' >> /etc/crontabs/root
 # Install Docker
 apk add docker docker-cli-compose@edge-community
 rc-update add docker
+sed -i 's~DOCKER_OPTS.*~DOCKER_OPTS="--userland-proxy=false --log-driver=gelf --log-opt=gelf-address=udp://grafana.zuba.dev:12201"~g' /etc/conf.d/docker
 service docker start
 
 # Reboot for good measure
