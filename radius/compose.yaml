@@ -26,13 +26,30 @@ services:
     ports:
       - 8000:8000
     environment:
-      - MYSQL_HOST=${DALO_DB_HOST:?DALO_DB_HOST environment variable is required}
-      - MYSQL_PORT=${DALO_DB_PORT:-3306}
-      - MYSQL_DATABASE=${DALO_DB_NAME:-radius}
-      - MYSQL_USER=${DALO_DB_USER:-radius}
-      - MYSQL_PASSWORD=${DALO_DB_PASS:-radpass}
+      - MYSQL_HOST=${MYSQL_DB_HOST:-mysql}
+      - MYSQL_PORT=${MYSQL_DB_PORT:-3306}
+      - MYSQL_DATABASE=${MYSQL_DB_NAME:-radius}
+      - MYSQL_USER=${MYSQL_DB_USER:-radius}
+      - MYSQL_PASSWORD=${MYSQL_DB_PASS:-radpass}
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    hostname: mysql.${HOSTNAME:?Set the HOSTNAME .env variable}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: ${MYSQL_DB_NAME:-radius}
+      MYSQL_USER: ${MYSQL_DB_USER:-radius}
+      MYSQL_PASSWORD: ${MYSQL_DB_PASS:-radpass}
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
 volumes:
   raddb:
+  mysql_data:
