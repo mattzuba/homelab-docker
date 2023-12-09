@@ -9,8 +9,6 @@ services:
     image: ghcr.io/dgtlmoon/changedetection.io
     hostname: speedtest.${HOSTNAME:?Set the HOSTNAME .env variable}
     restart: unless-stopped
-    ports:
-      - 5000:5000
     volumes:
       - changedetection_data:/datastore
     environment:
@@ -56,7 +54,7 @@ services:
         FROM caddy:latest
         COPY --from=builder /usr/bin/caddy /usr/bin/caddy
     ports:
-      - 8443:443
+      - 443:443
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
