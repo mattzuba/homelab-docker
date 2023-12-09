@@ -1,0 +1,76 @@
+version: "3"
+
+include:
+  - path: ../common/watchtower/compose.yaml
+  - path: ../common/portainer/compose.yaml
+
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io
+    hostname: speedtest.${HOSTNAME:?Set the HOSTNAME .env variable}
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - changedetection_data:/datastore
+    environment:
+      PLAYWRIGHT_DRIVER_URL: ws://playwright-chrome:3000/?stealth=1&--disable-web-security=true
+      BASE_URL: https://changedetection.zuba.dev
+      USE_X_SETTINGS: 1
+      HIDE_REFERER: "true"
+    depends_on:
+      playwright-chrome:
+        condition: service_started
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+    # Used for fetching pages via Playwright+Chrome where you need Javascript support.
+    # Note: Playwright/browserless not supported on ARM type devices (rPi etc)
+    # RECOMMENDED FOR FETCHING PAGES WITH CHROME
+  playwright-chrome:
+    hostname: playwright-chrome
+    image: browserless/chrome:1.60-chrome-stable
+    restart: unless-stopped
+    environment:
+      SCREEN_WIDTH: 1920
+      SCREEN_HEIGHT: 1024
+      SCREEN_DEPTH: 16
+      ENABLE_DEBUGGER: false
+      PREBOOT_CHROME: true
+      CONNECTION_TIMEOUT: 300000
+      MAX_CONCURRENT_SESSIONS: 10
+      CHROME_REFRESH_TIME: 600000
+      DEFAULT_BLOCK_ADS: true
+      DEFAULT_STEALTH: true
+      DEFAULT_IGNORE_HTTPS_ERRORS: true
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+  caddy:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM caddy:builder AS builder
+        RUN caddy-builder github.com/caddy-dns/cloudflare
+        
+        FROM caddy:latest
+        COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+    ports:
+      - 8443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CF_Token}
+
+  caddy-base:
+    image: caddy:latest
+    profiles:
+      - do-not-run
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+      - com.centurylinklabs.watchtower.monitor-only=true
+
+volumes:
+  changedetection_data:
+  caddy_data:
