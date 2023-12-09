@@ -1,3 +1,7 @@
+{
+  acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
 changedetection.zuba.dev {
   tls {
   	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
