@@ -15,7 +15,6 @@ services:
       PLAYWRIGHT_DRIVER_URL: ws://playwright-chrome:3000/?stealth=1&--disable-web-security=true
       BASE_URL: https://changedetection.zuba.dev
       USE_X_SETTINGS: 1
-      HIDE_REFERER: "true"
     depends_on:
       playwright-chrome:
         condition: service_started
