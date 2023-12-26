@@ -1,0 +1,38 @@
+version: '3'
+
+include:
+  - path: ../common/acme/compose.yaml
+  - path: ../common/portainer/compose.yaml
+  - path: ../common/watchtower/compose.yaml
+
+services:
+  frigate:
+#    privileged: true # this may not be necessary for all setups
+    restart: unless-stopped
+    image: ghcr.io/blakeblackshear/frigate:stable
+    shm_size: "256mb" # update for your cameras based on calculation above
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    cap_add:
+      - CAP_PERFMON
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config.yaml:/config/config.yml
+      - frigate_media:/media/frigate
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "5000:5000"
+      - "8554:8554" # RTSP feeds
+      - "8555:8555/tcp" # WebRTC over tcp
+      - "8555:8555/udp" # WebRTC over udp
+
+volumes:
+  frigate_media:
