@@ -12,6 +12,8 @@ esp.zuba.dev:443 {
 
   root * /srv/www
   handle_path /firmware/* {
-    file_server * browse
+    file_server * browse {
+      hide .gitignore
+    }
   }
 }
