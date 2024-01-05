@@ -1,0 +1,17 @@
+{
+  acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+  order cgi before respond
+}
+
+esp.zuba.dev:443 {
+  tls {
+  	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+  }
+
+  cgi /complete/* /usr/local/cgi-bin/complete
+
+  root * /srv/www
+  handle_path /firmware/* {
+    file_server * browse
+  }
+}

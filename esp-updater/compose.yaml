@@ -1,0 +1,37 @@
+version: "3"
+
+include:
+  - path: ../common/watchtower/compose.yaml
+  - path: ../common/portainer/compose.yaml
+
+services:
+  caddy:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM caddy:builder AS builder
+        RUN xcaddy build --with github.com/caddy-dns/cloudflare --with github.com/aksdb/caddy-cgi/v2
+        
+        FROM caddy:latest
+        COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+        COPY ./complete.sh /usr/local/cgi-bin/complete
+        RUN chmod 555 /usr/local/cgi-bin/complete
+    ports:
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./firmware:/srv/www
+      - caddy_data:/data
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CF_Token}
+
+  caddy-base:
+    image: caddy:latest
+    profiles:
+      - do-not-run
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+      - com.centurylinklabs.watchtower.monitor-only=true
+
+volumes:
+  caddy_data:
