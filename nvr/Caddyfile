@@ -1,0 +1,23 @@
+{
+  acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+nvr.zuba.dev:443 {
+  tls {
+  	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+  }
+
+  reverse_proxy http://frigate:5000
+
+  handle /double-take/* {
+    reverse_proxy http://doubletake:3000
+  }
+}
+
+nvr.zuba.dev:8443 {
+  tls {
+  	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+  }
+
+  reverse_proxy http://compreface-fe
+}

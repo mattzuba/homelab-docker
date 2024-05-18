@@ -1,0 +1,41 @@
+mqtt:
+  host: mqtt.ha.zuba.dev
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+
+cameras:
+  garage-east:
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:ZoeyAndZachary0913@10.0.30.10/h264Preview_01_main
+          roles:
+            - detect
+    detect:
+      enabled: False # <---- disable detection until you have a working camera feed
+      width: 1920 # <---- update for your camera's resolution
+      height: 1080 # <---- update for your camera's resolution
+
+#  wyze-1:
+#    ffmpeg:
+#      hwaccel_args: preset-nvidia-h264
+#      inputs:
+#        - path: rtsp://10.0.30.21:8554/video3_unicast
+#          roles:
+#            - detect
+#
+#    detect:
+#      enabled: False # <---- disable detection until you have a working camera feed
+#      width: 1280 # <---- update for your camera's resolution
+#      height: 720 # <---- update for your camera's resolution
+
+objects:
+  # Optional: list of objects to track from labelmap.txt (default: shown below)
+  track:
+    - person
+    - cat
+    - dog
+
+#detectors:
+#  coral:
+#    type: edgetpu
+#    device: usb

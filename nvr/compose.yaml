@@ -1,0 +1,153 @@
+include:
+  - path: ../common/portainer/compose.yaml
+  - path: ../common/watchtower/compose.yaml
+
+services:
+  caddy:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM caddy:builder AS builder
+        RUN xcaddy build --with github.com/caddy-dns/cloudflare
+        
+        FROM caddy:latest
+        COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CF_Token}
+
+  caddy-base:
+    image: caddy:latest
+    profiles:
+      - do-not-run
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+      - com.centurylinklabs.watchtower.monitor-only=true
+
+  frigate:
+#    privileged: true # this may not be necessary for all setups
+    image: ghcr.io/blakeblackshear/frigate:stable
+    environment:
+      FRIGATE_MQTT_USER: "${FRIGATE_MQTT_USER}"
+      FRIGATE_MQTT_PASSWORD: "${FRIGATE_MQTT_PASSWORD}"
+    restart: unless-stopped
+    shm_size: "256mb" # update for your cameras based on calculation above
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    cap_add:
+      - CAP_PERFMON
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./frigate-config.yaml:/config/config.yml
+      - /mnt/media/frigate:/media/frigate
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "127.0.0.1:5000:5000"
+      - "8554:8554" # RTSP feeds
+      - "8555:8555/tcp" # WebRTC over tcp
+      - "8555:8555/udp" # WebRTC over udp
+
+  doubletake:
+    image: ghcr.io/skrashevich/double-take:latest
+    restart: unless-stopped
+    volumes:
+      - /mnt/media/doubletake:/.storage
+      - ./doubletake-config.yml:/.storage/config/config.yml
+      - ./doubletake-secrets.yml:/.storage/config/secrets.yml
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - compreface-fe
+
+  compreface-postgres-db:
+    image: ${registry}compreface-postgres-db:${POSTGRES_VERSION}
+    restart: always
+    environment:
+      - POSTGRES_USER=${postgres_username}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - POSTGRES_DB=${postgres_db}
+    volumes:
+      - postgrest_data:/var/lib/postgresql/data
+
+  compreface-admin:
+    restart: always
+    image: ${registry}compreface-admin:${ADMIN_VERSION}
+    environment:
+      - POSTGRES_USER=${postgres_username}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - POSTGRES_URL=jdbc:postgresql://${postgres_domain}:${postgres_port}/${postgres_db}
+      - SPRING_PROFILES_ACTIVE=dev
+      - ENABLE_EMAIL_SERVER=${enable_email_server}
+      - EMAIL_HOST=${email_host}
+      - EMAIL_USERNAME=${email_username}
+      - EMAIL_FROM=${email_from}
+      - EMAIL_PASSWORD=${email_password}
+      - ADMIN_JAVA_OPTS=${compreface_admin_java_options}
+      - MAX_FILE_SIZE=${max_file_size}
+      - MAX_REQUEST_SIZE=${max_request_size}B
+    depends_on:
+      - compreface-postgres-db
+      - compreface-api
+
+  compreface-api:
+    restart: always
+    image: ${registry}compreface-api:${API_VERSION}
+    depends_on:
+      - compreface-postgres-db
+    environment:
+      - POSTGRES_USER=${postgres_username}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - POSTGRES_URL=jdbc:postgresql://${postgres_domain}:${postgres_port}/${postgres_db}
+      - SPRING_PROFILES_ACTIVE=dev
+      - API_JAVA_OPTS=${compreface_api_java_options}
+      - SAVE_IMAGES_TO_DB=${save_images_to_db}
+      - MAX_FILE_SIZE=${max_file_size}
+      - MAX_REQUEST_SIZE=${max_request_size}B
+      - CONNECTION_TIMEOUT=${connection_timeout:-10000}
+      - READ_TIMEOUT=${read_timeout:-60000}
+
+  compreface-fe:
+    restart: always
+    image: ${registry}compreface-fe:${FE_VERSION}
+    ports:
+      - "127.0.0.1:8000:80"
+    depends_on:
+      - compreface-api
+      - compreface-admin
+    environment:
+      - CLIENT_MAX_BODY_SIZE=${max_request_size}
+      - PROXY_READ_TIMEOUT=${read_timeout:-60000}ms
+      - PROXY_CONNECT_TIMEOUT=${connection_timeout:-10000}ms
+
+  compreface-core:
+    restart: always
+    image: ${registry}compreface-core:${CORE_VERSION}
+    environment:
+      - ML_PORT=3000
+      - IMG_LENGTH_LIMIT=${max_detect_size}
+      - UWSGI_PROCESSES=${uwsgi_processes:-2}
+      - UWSGI_THREADS=${uwsgi_threads:-1}
+    healthcheck:
+      test: curl --fail http://localhost:3000/healthcheck || exit 1
+      interval: 10s
+      retries: 0
+      start_period: 0s
+      timeout: 1s
+
+volumes:
+  caddy_data:
+  postgrest_data:

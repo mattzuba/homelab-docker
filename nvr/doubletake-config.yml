@@ -1,0 +1,18 @@
+mqtt:
+  host: mqtt.ha.zuba.dev
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+
+ui:
+  path: /double-take
+
+frigate:
+  url: http://frigate:5000
+
+detectors:
+  compreface:
+    url: http://compreface-fe
+    face_plugins: gender
+    key: !secret compreface_key
+
+telemetry: false
