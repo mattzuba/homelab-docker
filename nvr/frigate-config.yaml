@@ -7,7 +7,7 @@ cameras:
   garage-east:
     ffmpeg:
       inputs:
-        - path: rtsp://admin:ZoeyAndZachary0913@10.0.30.10/h264Preview_01_main
+        - path: rtsp://{FRIGATE_RTSP_USERNAME}:{FRIGATE_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_main
           roles:
             - detect
     detect:

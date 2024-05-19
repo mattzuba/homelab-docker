@@ -13,6 +13,7 @@ services:
         FROM caddy:latest
         COPY --from=builder /usr/bin/caddy /usr/bin/caddy
     ports:
+      - "443:443"
       - "8443:8443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
@@ -34,6 +35,8 @@ services:
     environment:
       FRIGATE_MQTT_USER: "${FRIGATE_MQTT_USER}"
       FRIGATE_MQTT_PASSWORD: "${FRIGATE_MQTT_PASSWORD}"
+      FRIGATE_RTSP_USERNAME: "${FRIGATE_RTSP_USERNAME}"
+      FRIGATE_RTSP_PASSWORD: "${FRIGATE_RTSP_PASSWORD}"
     restart: unless-stopped
     shm_size: "256mb" # update for your cameras based on calculation above
     devices:
@@ -75,17 +78,17 @@ services:
 
   compreface-postgres-db:
     image: ${registry}compreface-postgres-db:${POSTGRES_VERSION}
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=${postgres_username}
       - POSTGRES_PASSWORD=${postgres_password}
       - POSTGRES_DB=${postgres_db}
     volumes:
-      - postgrest_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
   compreface-admin:
-    restart: always
     image: ${registry}compreface-admin:${ADMIN_VERSION}
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=${postgres_username}
       - POSTGRES_PASSWORD=${postgres_password}
@@ -104,8 +107,8 @@ services:
       - compreface-api
 
   compreface-api:
-    restart: always
     image: ${registry}compreface-api:${API_VERSION}
+    restart: unless-stopped
     depends_on:
       - compreface-postgres-db
     environment:
@@ -121,8 +124,8 @@ services:
       - READ_TIMEOUT=${read_timeout:-60000}
 
   compreface-fe:
-    restart: always
     image: ${registry}compreface-fe:${FE_VERSION}
+    restart: unless-stopped
     ports:
       - "127.0.0.1:8000:80"
     depends_on:
@@ -134,20 +137,14 @@ services:
       - PROXY_CONNECT_TIMEOUT=${connection_timeout:-10000}ms
 
   compreface-core:
-    restart: always
     image: ${registry}compreface-core:${CORE_VERSION}
+    restart: unless-stopped
     environment:
       - ML_PORT=3000
       - IMG_LENGTH_LIMIT=${max_detect_size}
       - UWSGI_PROCESSES=${uwsgi_processes:-2}
       - UWSGI_THREADS=${uwsgi_threads:-1}
-    healthcheck:
-      test: curl --fail http://localhost:3000/healthcheck || exit 1
-      interval: 10s
-      retries: 0
-      start_period: 0s
-      timeout: 1s
 
 volumes:
   caddy_data:
-  postgrest_data:
+  postgres_data:
