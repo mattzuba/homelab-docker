@@ -158,6 +158,13 @@ services:
       - UWSGI_THREADS=${uwsgi_threads:-1}
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+    deploy:
+       resources:
+         reservations:
+           devices:
+             - driver: nvidia
+               count: all
+               capabilities: [gpu]
 
 volumes:
   caddy_data:
