@@ -30,7 +30,7 @@ services:
       - com.centurylinklabs.watchtower.monitor-only=true
 
   frigate:
-#    privileged: true # this may not be necessary for all setups
+    privileged: true # this may not be necessary for all setups
     image: ghcr.io/blakeblackshear/frigate:stable
     environment:
       FRIGATE_MQTT_USER: "${FRIGATE_MQTT_USER}"
