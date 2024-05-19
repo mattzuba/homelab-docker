@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configurable variables
-API_URL = "http://localhost:8000/api/v1/detection/detect"
+API_URL = "https://nvr.zuba.dev:8443/api/v1/detection/detect"
 API_KEY = os.getenv("API_KEY")
 INPUT_DIR = "input_photos"
 OUTPUT_DIR = "output_faces"

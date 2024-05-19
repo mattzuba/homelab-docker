@@ -84,7 +84,7 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/nvidia-container.asc] https://nvidia.github.io/libnvidia-container/stable/deb/\$(ARCH) /" | \
   sudo tee /etc/apt/sources.list.d/nvidia-container.list > /dev/null
 sudo apt update
-sudo apt install -y nvidia-container-toolkit nvidia-utils-535-server linux-modules-nvidia-535-server-generic
+sudo apt install -y nvidia-container-toolkit nvidia-utils-535-server linux-modules-nvidia-535-server-generic libnvidia-decode-535-server
 sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
 ```
@@ -93,4 +93,4 @@ Give it a reboot for good measure
 
 ```shell
 sudo reboot
-```
+``` 
