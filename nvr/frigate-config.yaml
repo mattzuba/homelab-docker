@@ -3,37 +3,34 @@ mqtt:
   user: "{FRIGATE_MQTT_USER}"
   password: "{FRIGATE_MQTT_PASSWORD}"
 
+go2rtc:
+  streams:
+    garage-east:
+      - rtsp://{FRIGATE_RTSP_USERNAME}:{FRIGATE_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_main
+    garage-east-sub:
+      - rtsp://{FRIGATE_RTSP_USERNAME}:{FRIGATE_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_sub
+
 cameras:
   garage-east:
     ffmpeg:
+      hwaccel_args: preset-nvidia-h264
       inputs:
-        - path: rtsp://{FRIGATE_RTSP_USERNAME}:{FRIGATE_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_main
+        - path: rtsp://127.0.0.1:8554/garage-east
           roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/garage-east-sub
+          roles:
+            - audio
             - detect
     detect:
       enabled: False # <---- disable detection until you have a working camera feed
       width: 1920 # <---- update for your camera's resolution
       height: 1080 # <---- update for your camera's resolution
 
-#  wyze-1:
-#    ffmpeg:
-#      hwaccel_args: preset-nvidia-h264
-#      inputs:
-#        - path: rtsp://10.0.30.21:8554/video3_unicast
-#          roles:
-#            - detect
-#
-#    detect:
-#      enabled: False # <---- disable detection until you have a working camera feed
-#      width: 1280 # <---- update for your camera's resolution
-#      height: 720 # <---- update for your camera's resolution
-
 objects:
   # Optional: list of objects to track from labelmap.txt (default: shown below)
   track:
     - person
-    - cat
-    - dog
 
 detectors:
   coral:
