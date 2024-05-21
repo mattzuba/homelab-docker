@@ -3,15 +3,42 @@ mqtt:
   user: "{FRIGATE_MQTT_USER}"
   password: "{FRIGATE_MQTT_PASSWORD}"
 
+record:
+  enabled: True
+  retain:
+    days: 7
+    mode: all
+  events:
+    retain:
+      default: 30
+      mode: motion
+
+objects:
+  # Optional: list of objects to track from labelmap.txt (default: shown below)
+  track:
+    - person
+
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+
 go2rtc:
   streams:
     garage-east:
-      - rtsp://{FRIGATE_RTSP_USERNAME}:{FRIGATE_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_main
+      - rtsp://{FRIGATE_REOLINK_RTSP_USERNAME}:{FRIGATE_REOLINK_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_main
     garage-east-sub:
-      - rtsp://{FRIGATE_RTSP_USERNAME}:{FRIGATE_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_sub
+      - rtsp://{FRIGATE_REOLINK_RTSP_USERNAME}:{FRIGATE_REOLINK_RTSP_PASSWORD}@10.0.30.10/h264Preview_01_sub
+    doorbell:
+      - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@doorbell-camera.zuba.dev/stream1
+    doorbell-sub:
+      - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@doorbell-camera.zuba.dev/stream2
 
 cameras:
   garage-east:
+    objects:
+      track:
+        - car
     ffmpeg:
       hwaccel_args: preset-nvidia-h264
       inputs:
@@ -23,16 +50,25 @@ cameras:
             - audio
             - detect
     detect:
-      enabled: False # <---- disable detection until you have a working camera feed
-      width: 1920 # <---- update for your camera's resolution
-      height: 1080 # <---- update for your camera's resolution
+      enabled: True
+      width: 640
+      height: 352
 
-objects:
-  # Optional: list of objects to track from labelmap.txt (default: shown below)
-  track:
-    - person
-
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+  doorbell:
+    objects:
+      track:
+        - person
+    ffmpeg:
+      hwaccel_args: preset-nvidia-h264
+      inputs:
+        - path: rtsp://127.0.0.1:8554/doorbell
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/doorbell-sub
+          roles:
+            - audio
+            - detect
+    detect:
+      enabled: True
+      width: 1280
+      height: 960

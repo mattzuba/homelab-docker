@@ -4,6 +4,7 @@ include:
 
 services:
   caddy:
+    restart: unless-stopped
     build:
       context: .
       dockerfile_inline: |
@@ -35,8 +36,10 @@ services:
     environment:
       FRIGATE_MQTT_USER: "${FRIGATE_MQTT_USER}"
       FRIGATE_MQTT_PASSWORD: "${FRIGATE_MQTT_PASSWORD}"
-      FRIGATE_RTSP_USERNAME: "${FRIGATE_RTSP_USERNAME}"
-      FRIGATE_RTSP_PASSWORD: "${FRIGATE_RTSP_PASSWORD}"
+      FRIGATE_REOLINK_RTSP_USERNAME: "${FRIGATE_REOLINK_RTSP_USERNAME}"
+      FRIGATE_REOLINK_RTSP_PASSWORD: "${FRIGATE_REOLINK_RTSP_PASSWORD}"
+      FRIGATE_TAPO_RTSP_USERNAME: "${FRIGATE_TAPO_RTSP_USERNAME}"
+      FRIGATE_TAPO_RTSP_PASSWORD: "${FRIGATE_TAPO_RTSP_PASSWORD}"
     restart: unless-stopped
     shm_size: "256mb" # update for your cameras based on calculation above
     devices:
