@@ -13,6 +13,15 @@ record:
       default: 30
       mode: motion
 
+snapshots:
+  enabled: true
+  bounding_box: false
+  crop: true
+  timestamp: false
+  retain:
+    default: 10
+    mode: all
+
 objects:
   # Optional: list of objects to track from labelmap.txt (default: shown below)
   track:
@@ -22,6 +31,9 @@ detectors:
   coral:
     type: edgetpu
     device: usb
+
+ffmpeg:
+  hwaccel_args: preset-nvidia-h264
 
 go2rtc:
   streams:
@@ -33,6 +45,10 @@ go2rtc:
       - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@doorbell-camera.zuba.dev/stream1
     doorbell-sub:
       - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@doorbell-camera.zuba.dev/stream2
+  webrtc:
+    candidates:
+      - 10.0.30.212:8555
+      - stun:8555
 
 cameras:
   garage-east:
@@ -40,7 +56,6 @@ cameras:
       track:
         - car
     ffmpeg:
-      hwaccel_args: preset-nvidia-h264
       inputs:
         - path: rtsp://127.0.0.1:8554/garage-east
           roles:
@@ -50,7 +65,7 @@ cameras:
             - audio
             - detect
     detect:
-      enabled: True
+      enabled: False
       width: 640
       height: 352
 
@@ -59,7 +74,6 @@ cameras:
       track:
         - person
     ffmpeg:
-      hwaccel_args: preset-nvidia-h264
       inputs:
         - path: rtsp://127.0.0.1:8554/doorbell
           roles:

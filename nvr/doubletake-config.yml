@@ -8,11 +8,15 @@ ui:
 
 frigate:
   url: http://frigate:5000
+  update_sub_labels: true
 
 detectors:
   compreface:
     url: http://compreface-fe
-    face_plugins: gender
     key: !secret compreface_key
+
+detect:
+  match:
+    min_area: 1000
 
 telemetry: false
