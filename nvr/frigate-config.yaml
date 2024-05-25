@@ -45,6 +45,10 @@ go2rtc:
       - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@doorbell-camera.zuba.dev/stream1
     doorbell-sub:
       - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@doorbell-camera.zuba.dev/stream2
+    patio:
+      - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@patio-camera.zuba.dev/stream1
+    patio-sub:
+      - rtsp://{FRIGATE_TAPO_RTSP_USERNAME}:{FRIGATE_TAPO_RTSP_PASSWORD}@patio-camera.zuba.dev/stream2
   webrtc:
     candidates:
       - 10.0.30.212:8555
@@ -66,10 +70,11 @@ cameras:
             - detect
     detect:
       enabled: False
-      width: 640
-      height: 352
 
   doorbell:
+    motion:
+      mask:
+        - 2286,1547,1890,1379,1420,899,982,893,948,0,2034,0
     objects:
       track:
         - person
@@ -80,9 +85,23 @@ cameras:
             - record
         - path: rtsp://127.0.0.1:8554/doorbell-sub
           roles:
-            - audio
             - detect
+            - audio
     detect:
       enabled: True
-      width: 1280
-      height: 960
+
+  patio:
+    objects:
+      track:
+        - person
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/patio
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/patio-sub
+          roles:
+            - detect
+            - audio
+    detect:
+      enabled: True

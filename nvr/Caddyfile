@@ -19,5 +19,5 @@ nvr.zuba.dev:8443 {
   	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
   }
 
-  reverse_proxy http://compreface-fe
+  reverse_proxy http://codeproject:32168
 }

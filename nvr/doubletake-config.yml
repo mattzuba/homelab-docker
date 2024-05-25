@@ -11,9 +11,8 @@ frigate:
   update_sub_labels: true
 
 detectors:
-  compreface:
-    url: http://compreface-fe
-    key: !secret compreface_key
+  aiserver:
+    url: http://codeproject:32168
 
 detect:
   match:
