@@ -1,5 +1,3 @@
-version: "3"
-
 include:
   - path: ../common/watchtower/compose.yaml
   - path: ../common/portainer/compose.yaml
