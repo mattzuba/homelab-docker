@@ -33,9 +33,6 @@ services:
     image: madnuttah/unbound:latest
     restart: unless-stopped
     hostname: unbound.${HOSTNAME:?Set the HOSTNAME .env variable}
-    ports:
-      - "5335:5335/tcp"
-      - "5335:5335/udp"
     volumes:
       - ./unbound.conf:/usr/local/unbound/unbound.conf:rw
     volumes_from:
