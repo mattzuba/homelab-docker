@@ -30,17 +30,38 @@ services:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
   
   unbound:
-    image: alpinelinux/unbound:latest
+    image: madnuttah/unbound:latest
     restart: unless-stopped
     hostname: unbound.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
-      - "5354:53/tcp"
-      - "5354:53/udp"
+      - "5335:5335/tcp"
+      - "5335:5335/udp"
     volumes:
-      - ./unbound.conf:/etc/unbound/unbound.conf
+      - ./unbound.conf:/usr/local/unbound/unbound.conf:rw
+    volumes_from:
+      - redis-socket:rw
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+  redis:
+    container_name: unbound-db
+    image: redis:alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    volumes_from:
+      - redis-socket:rw
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+  redis-socket:
+    image: busybox
+    container_name: redis-socket
+    command: install -d -m 0755 -o 999 -g 1000 /usr/local/unbound/cachedb.d
+    volumes:
+      - cachedb:/usr/local/unbound/cachedb.d
 
 volumes:
   adguard_work:
   adguard_conf:
+  cachedb:
