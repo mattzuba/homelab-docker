@@ -40,6 +40,8 @@ services:
       - ./unbound.conf:/usr/local/unbound/unbound.conf:rw
     volumes_from:
       - redis-socket:rw
+    depends_on:
+      - redis
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
