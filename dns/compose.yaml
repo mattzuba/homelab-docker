@@ -43,9 +43,9 @@ services:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
   redis:
-    container_name: unbound-db
     image: redis:alpine
     command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     volumes_from:
