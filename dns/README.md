@@ -1,6 +1,6 @@
 ## Intro
 
-This is a Docker Compose setup that uses AdGuard Home, knot-resolver, acme for ssl, Portainer agent and Watchtower
+This is a Docker Compose setup that uses AdGuard Home, unbound, acme for ssl, Portainer agent and Watchtower
 
 ## Instructions
 
