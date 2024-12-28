@@ -43,11 +43,18 @@ services:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
   redis:
-    image: redis:alpine
-    command: redis-server /usr/local/etc/redis/redis.conf
+    image: redis/redis-stack
     restart: unless-stopped
+    environment:
+      - RI_SERVER_TLS_CERT=/opt/ssl/dns.crt
+      - RI_SERVER_TLS_KEY=/opt/ssl/dns.key
+      - RI_APP_PORT=8443
+      - REDIS_DATA_DIR=/usr/local/unbound/cachedb.d
+      - REDIS_ARGS=--unixsocket /usr/local/unbound/cachedb.d/redis.sock --unixsocketperm 770 --appendonly yes --appendfsync everysec
+    ports:
+      - "8444:8443/tcp"
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - acme_certs:/opt/ssl
     volumes_from:
       - redis-socket:rw
     labels:
