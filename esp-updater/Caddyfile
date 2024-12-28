@@ -3,10 +3,11 @@
   order cgi before respond
 }
 
-esp.zuba.dev:443 {
+l000-bugfixer.zuba.dev:443 {
   tls {
   	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
   }
+#  tls internal
 
   cgi /complete/* /usr/local/cgi-bin/complete
 

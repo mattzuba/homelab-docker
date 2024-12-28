@@ -32,3 +32,4 @@ fi
 
 message "Deleting firmware file $FIRMWARE"
 rm "/srv/www/$FIRMWARE"
+rm -f "/srv/www/$FIRMWARE.md5"
