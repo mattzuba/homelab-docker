@@ -50,9 +50,9 @@ services:
       - RI_SERVER_TLS_KEY=/opt/ssl/dns.key
       - RI_APP_PORT=8443
       - REDIS_DATA_DIR=/usr/local/unbound/cachedb.d
-      - REDIS_ARGS=--unixsocket /usr/local/unbound/cachedb.d/redis.sock --unixsocketperm 770 --appendonly yes --appendfsync everysec
+      - REDIS_ARGS=--unixsocket /usr/local/unbound/cachedb.d/redis.sock --unixsocketperm 777 --appendonly yes --appendfsync everysec
     ports:
-      - "8444:8443/tcp"
+      - "8443:8443/tcp"
     volumes:
       - acme_certs:/opt/ssl
     volumes_from:
