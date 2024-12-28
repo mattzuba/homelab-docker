@@ -1,17 +1,14 @@
 {
   acme_ca https://acme-v02.api.letsencrypt.org/directory
-  order cgi before respond
 }
 
-l000-bugfixer.zuba.dev:443 {
+esp.zuba.dev:443 {
   tls {
   	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
   }
-#  tls internal
-
-  cgi /complete/* /usr/local/cgi-bin/complete
 
   root * /srv/www
+
   handle_path /firmware/* {
     file_server * browse {
       hide .gitignore
