@@ -1,5 +1,4 @@
 include:
-  - path: ../common/portainer/compose.yaml
   - path: ../common/watchtower/compose.yaml
 
 services:

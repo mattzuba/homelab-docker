@@ -1,9 +1,6 @@
-version: '3'
-
 include:
   - path: ../common/acme/compose.yaml
   - path: ../common/cloudflare/compose.yaml
-  - path: ../common/portainer/compose.yaml
   - path: ../common/watchtower/compose.yaml
 
 services:
