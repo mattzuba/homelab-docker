@@ -1,0 +1,54 @@
+include:
+  - path: ../common/acme/compose.yaml
+  - path: ../common/cloudflare/compose.yaml
+  - path: ../common/watchtower/compose.yaml
+
+services:
+  xo:
+    image: ezka77/xen-orchestra-ce:latest
+    restart: unless-stopped
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    environment:
+      - XO_HTTP_LISTEN_PORT=80
+      - XO_HTTPS_LISTEN_PORT=443
+      - XO_HTTP_REDIRECTTOHTTPS=true
+      - XO_HTTPS_LISTEN_CERT=/opt/ssl/ssl.crt
+      - XO_HTTPS_LISTEN_KEY=/opt/ssl/ssl.key
+      - DEBUG=xo:main
+      - NODE_ENV=production
+      - XOA_PLAN=5
+    cap_add:
+      - SYS_ADMIN
+    # LVM 
+    devices:
+      - "/dev/fuse:/dev/fuse"
+      - "/dev/loop-control:/dev/loop-control"
+    volumes:
+      - xo-data:/storage
+      - acme_certs:/opt/ssl
+    labels:
+      - sh.acme.autoload.domain=xo
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+  redis:
+    image: redis/redis-stack
+    restart: unless-stopped
+    environment:
+      - RI_SERVER_TLS_CERT=/opt/ssl/ssl.crt
+      - RI_SERVER_TLS_KEY=/opt/ssl/ssl.key
+      - RI_APP_PORT=8443
+      - REDIS_ARGS=--unixsocket /data/redis.sock --unixsocketperm 777 --appendonly yes --appendfsync everysec
+    ports:
+      - "8443:8443/tcp"
+    volumes:
+      - redis-data:/data
+      - acme_certs:/opt/ssl
+    labels:
+      - sh.acme.autoload.domain=xo
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+volumes:
+  xo-data:
+  redis-data:
