@@ -29,11 +29,12 @@ services:
     image: prom/prometheus:latest
     restart: unless-stopped
     hostname: prometheus.${HOSTNAME:?Set the HOSTNAME .env variable}
+    command: '--config.file=/etc/prometheus/prometheus.yaml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=365d'
     ports:
       - "9090:9090"
     volumes:
       - prometheus_data:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
