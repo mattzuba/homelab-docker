@@ -20,49 +20,33 @@ services:
     volumes:
       - grafana_storage:/var/lib/grafana
       - acme_certs:/opt/ssl
-      - ./loki_ds.yaml:/etc/grafana/provisioning/datasources/loki_ds.yaml
+      - ./prom_ds.yaml:/etc/grafana/provisioning/datasources/prom_ds.yaml
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - sh.acme.autoload.domain=grafana
 
-  loki:
-    image: grafana/loki:latest
+  prometheus:
+    image: prom/prometheus:latest
     restart: unless-stopped
-    command: -config.file=/etc/loki/local-config.yaml -reporting.enabled=false
-    hostname: loki.${HOSTNAME:?Set the HOSTNAME .env variable}
+    hostname: prometheus.${HOSTNAME:?Set the HOSTNAME .env variable}
     ports:
-      - "3100:3100"
+      - "9090:9090"
     volumes:
-      - loki_data:/loki
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
-  promtail:
-    image: grafana/promtail:latest
+  unpoller:
+    image: ghcr.io/unpoller/unpoller:latest
     restart: unless-stopped
-    command: -config.file=/etc/promtail/promtail.yaml -config.expand-env=true
-    hostname: promtail.${HOSTNAME:?Set the HOSTNAME .env variable}
-    ports:
-      - "12201:12201/udp"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./promtail.yaml:/etc/promtail/promtail.yaml
+    hostname: unpoller.${HOSTNAME:?Set the HOSTNAME .env variable}
+    environment:
+      - UP_INFLUXDB_DISABLE=true
+      - UP_UNIFI_DEFAULT_URL=https://unifi.zuba.dev:8443
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-
-  syslog:
-    image: balabit/syslog-ng:latest
-    restart: unless-stopped
-    hostname: syslog.${HOSTNAME:?Set the HOSTNAME .env variable}
-    ports:
-      - "514:514/udp"
-      - "514:514/tcp"
-      - "601:601/tcp"
-    volumes:
-      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
-    labels:
-      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-
+    
 volumes:
   grafana_storage:
-  loki_data:
+  prometheus_data:
