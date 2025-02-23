@@ -1,0 +1,3 @@
+[submodule "wazuh-docker"]
+	path = wazuh-docker
+	url = git@github.com:wazuh/wazuh-docker
