@@ -42,18 +42,9 @@ services:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
   redis:
-    image: redis/redis-stack
+    image: redis:alpine
     restart: unless-stopped
-    environment:
-      - RI_SERVER_TLS_CERT=/opt/ssl/dns.crt
-      - RI_SERVER_TLS_KEY=/opt/ssl/dns.key
-      - RI_APP_PORT=8443
-      - REDIS_DATA_DIR=/usr/local/unbound/cachedb.d
-      - REDIS_ARGS=--unixsocket /usr/local/unbound/cachedb.d/redis.sock --unixsocketperm 777 --appendonly yes --appendfsync everysec
-    ports:
-      - "8443:8443/tcp"
-    volumes:
-      - acme_certs:/opt/ssl
+    command: '--dir /usr/local/unbound/cachedb.d --unixsocket /usr/local/unbound/cachedb.d/redis.sock --unixsocketperm 777 --appendonly yes --appendfsync everysec'
     volumes_from:
       - redis-socket:rw
     labels:
@@ -66,6 +57,18 @@ services:
     volumes:
       - cachedb:/usr/local/unbound/cachedb.d
 
+  metrics-exporter:
+    image: ghcr.io/henrywhitaker3/adguard-exporter:latest
+    restart: unless-stopped
+    hostname: metrics-exporter.${HOSTNAME:?Set the HOSTNAME .env variable}
+    ports:
+      - "9618:9618"
+    environment:
+      - ADGUARD_SERVERS=https://dns.zuba.dev
+      - ADGUARD_USERNAMES=administrator
+      - ADGUARD_PASSWORDS=${ADGUARD_PASSWORDS}
+      - INTERVAL=15s
+    
 volumes:
   adguard_work:
   adguard_conf:
