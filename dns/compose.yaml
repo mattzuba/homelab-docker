@@ -68,6 +68,8 @@ services:
       - ADGUARD_USERNAMES=administrator
       - ADGUARD_PASSWORDS=${ADGUARD_PASSWORDS}
       - INTERVAL=15s
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     
 volumes:
   adguard_work:
