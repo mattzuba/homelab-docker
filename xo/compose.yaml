@@ -1,6 +1,5 @@
 include:
   - path: ../common/acme/compose.yaml
-  - path: ../common/cloudflare/compose.yaml
   - path: ../common/watchtower/compose.yaml
 
 services:
@@ -33,15 +32,9 @@ services:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
   redis:
-    image: redis/redis-stack
+    image: redis:alpine
     restart: unless-stopped
-    environment:
-      - RI_SERVER_TLS_CERT=/opt/ssl/ssl.crt
-      - RI_SERVER_TLS_KEY=/opt/ssl/ssl.key
-      - RI_APP_PORT=8443
-      - REDIS_ARGS=--unixsocket /data/redis.sock --unixsocketperm 777 --appendonly yes --appendfsync everysec
-    ports:
-      - "8443:8443/tcp"
+    command: '--appendonly yes --appendfsync everysec'
     volumes:
       - redis-data:/data
       - acme_certs:/opt/ssl
