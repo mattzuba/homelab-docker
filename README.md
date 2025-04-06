@@ -5,19 +5,17 @@ IaC for my home lab
 ## Core Services
 
 * Vaultwarden
-* OpenSpeedtest
-* freeRADIUS
 * Ntfy
-* Grafana (with Loki)
+* Grafana
 * AdGuard Home
-* Portainer
+* esp-updater
+* Frigate
+* Wazuh
 
 ## Common Services
 
 * acme.sh
 * cloudflared
-* portainer agent
-* promtail agent
 * watchtower
 
 ## Instructions

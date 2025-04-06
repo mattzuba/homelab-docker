@@ -1,0 +1,146 @@
+#cloud-config
+
+hostname: {name}
+
+timezone: America/Phoenix
+
+growpart:
+  devices: [/]
+  mode: auto
+
+user:
+  name: admin
+
+ssh_authorized_keys:
+  - ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBMfz5mLAhimxQDvklU4ezuLiODqNukw6b9S5UUlT1S6U6dIKlM0qfpjlcvCAv7O0524M4Sfk1iEyal61pu28jPEq+QyC3r9u6jNlLn5SVfxipXavcyHr+RIRkhBXnJhVDQ==
+
+ssh:
+  emit_keys_to_console: false
+
+yum_repos:
+  docker-ce-stable:
+    name: Docker CE Stable
+    baseurl: https://download.docker.com/linux/centos/9/$basearch/stable
+    gpgcheck: 1
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  wazuh:
+    name: Wazuh
+    baseurl: https://packages.wazuh.com/4.x/yum
+    gpgcheck: 1
+    gpgkey: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+
+package_update: true
+packages:
+  - https://github.com/xenserver/xe-guest-utilities/releases/download/v8.4.0/xe-guest-utilities-8.4.0-1.x86_64.rpm
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+  - kpatch-dnf
+  - kpatch-runtime
+  - wazuh-agent
+  - git
+
+write_files:
+  # GSSAPI Auth is causing slowdowns on ssh login, disable it
+  - path: /etc/ssh/sshd_config.d/00-zuba.conf
+    permissions: 0600
+    content: |
+      GSSAPIAuthentication no
+
+  # Create a mechanism for auto updates that will run nightly
+  - path: /etc/systemd/system/dnf-upgrade.service
+    content: |
+      [Unit]
+      Description=Automatic upgrades for dnf packages
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/dnf upgrade --assumeyes --releasever=latest
+
+  - path: /etc/systemd/system/dnf-upgrade.timer
+    content: |
+      [Unit]
+      Description=Timer for automatic upgrades for dnf packages
+
+      [Timer]
+      OnCalendar=daily
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+  # The version of cloud-init that ships with AL2023 didn't take the cloud-init.disabled file into account, this helps
+  - path: /etc/systemd/system/cloud-init-local.service.d/override.conf
+    content: |
+      [Unit]
+      ConditionPathExists=!/etc/cloud/cloud-init.disabled
+
+  - path: /etc/systemd/system/cloud-init.service.d/override.conf
+    content: |
+      [Unit]
+      ConditionPathExists=!/etc/cloud/cloud-init.disabled
+
+  - path: /etc/systemd/system/cloud-config.service.d/override.conf
+    content: |
+      [Unit]
+      ConditionPathExists=!/etc/cloud/cloud-init.disabled
+
+  - path: /etc/systemd/system/cloud-final.service.d/override.conf
+    content: |
+      [Unit]
+      ConditionPathExists=!/etc/cloud/cloud-init.disabled
+
+  # Add docker config to wazuh agent
+  - path: /var/ossec/etc/ossec.conf
+    defer: true
+    append: true
+    permissions: 0660
+    owner: root:wazuh
+    content: |
+      
+      <ossec_config>
+        <wodle name="docker-listener">
+          <disabled>no</disabled>
+        </wodle>
+        <localfile>
+          <log_format>syslog</log_format>
+          <location>/var/lib/docker/containers/*/*-json.log</location>
+        </localfile>
+      </ossec_config>
+
+runcmd:
+  # Fix rngd by excluding jitter source
+  - sed -i 's/nist"/nist -x jitter"/g' /etc/sysconfig/rngd
+  - systemctl restart rngd
+
+  # Setting up Live Patching
+  - dnf kernel-livepatch -y auto
+
+  # Remove stuff not needed
+  - dnf remove -y amazon-ssm-agent
+
+  # Configure Wazuh
+  - python3 -m venv --upgrade-deps /opt/wazuh-docker
+  - /opt/wazuh-docker/bin/pip install docker urllib3 requests
+  - sed -i 's/MANAGER_IP/10.0.2.6/g' /var/ossec/etc/ossec.conf
+  - sed -i 's~#!/usr/bin/env python3~#!/opt/wazuh-docker/bin/python~g' /var/ossec/wodles/docker/DockerListener
+  - sed -i "s/^enabled=1/enabled=0/" /etc/yum.repos.d/wazuh.repo
+
+  # Add default user to docker group
+  - usermod -a -G docker admin
+
+  # Enable/start/disable services
+  - systemctl enable wazuh-agent
+  - systemctl enable docker
+  - systemctl enable kpatch
+  - systemctl enable dnf-upgrade.timer
+
+  # Disable cloud-init
+  - touch /etc/cloud/cloud-init.disabled
+
+power_state:
+  mode: reboot
+  condition: true
+  message: Rebooting...
