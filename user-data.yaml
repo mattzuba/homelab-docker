@@ -67,6 +67,7 @@ write_files:
       [Timer]
       OnCalendar=daily
       Persistent=true
+      RandomizedDelaySec=600
 
       [Install]
       WantedBy=timers.target

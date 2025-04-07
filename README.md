@@ -20,4 +20,4 @@ IaC for my home lab
 
 ## Instructions
 
-Spin up Alpine VM, install Docker, clone to /opt/homelab, then `git sparse-checkout set common <dir>` where `<dir>` is the service that will run on that machine, then `cd /opt/homelab/<dir>` and follow the readme.
+Spin up AL2023 VM with the user-data.yaml in cloud-init, clone to /opt/homelab, then `git sparse-checkout set common <dir>` where `<dir>` is the service that will run on that machine, then `cd /opt/homelab/<dir>` and follow the readme.
