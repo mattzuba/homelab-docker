@@ -1,6 +1,5 @@
 include:
   - path: ../common/watchtower/compose.yaml
-  - path: ../common/acme/compose.yaml
 
 services:
   adguard:
@@ -72,6 +71,7 @@ services:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     
 volumes:
+  acme_certs:
   adguard_work:
   adguard_conf:
   cachedb:
