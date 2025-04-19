@@ -1,0 +1,15 @@
+{
+  acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+wazuh.zuba.dev {
+  tls {
+  	dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+  }
+
+  reverse_proxy https://wazuh.dashboard:5601 {
+    transport http {
+      tls_insecure_skip_verify
+    }
+  }
+}

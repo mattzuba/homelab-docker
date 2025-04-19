@@ -1,0 +1,46 @@
+include:
+  - path: ../../../common/watchtower/compose.yaml
+
+services:
+  wazuh.manager:
+    restart: unless-stopped
+
+  wazuh.indexer:
+    restart: unless-stopped
+    volumes:
+      - ../../config/internal_users.yml:/usr/share/wazuh-indexer/opensearch-security/internal_users.yml  
+  
+  wazuh.dashboard:
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:?Set the DASHBOARD_PASSWORD .env variable}
+    
+  caddy:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM caddy:builder AS builder
+        RUN xcaddy build --with github.com/caddy-dns/cloudflare
+        
+        FROM caddy:latest
+        COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+    ports:
+      - "443:443"
+    volumes:
+      - ../../Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CF_Token}
+
+  caddy-base:
+    image: caddy:latest
+    profiles:
+      - do-not-run
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+      - com.centurylinklabs.watchtower.monitor-only=true
+
+volumes:
+  caddy_data:
