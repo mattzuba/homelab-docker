@@ -26,7 +26,11 @@ services:
     labels:
       - sh.acme.autoload.domain=dns
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
-  
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+          
   unbound:
     image: madnuttah/unbound:latest
     restart: unless-stopped
