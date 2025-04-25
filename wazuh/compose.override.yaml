@@ -4,6 +4,8 @@ include:
 services:
   wazuh.manager:
     restart: unless-stopped
+    ports:
+      - "514:514/tcp"
 
   wazuh.indexer:
     restart: unless-stopped
