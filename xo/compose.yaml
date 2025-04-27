@@ -37,7 +37,6 @@ services:
     volumes:
       - redis_data:/data
     labels:
-      - sh.acme.autoload.domain=xo
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
 volumes:
