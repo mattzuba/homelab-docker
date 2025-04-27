@@ -1,5 +1,4 @@
 include:
-  - path: ../common/acme/compose.yaml
   - path: ../common/watchtower/compose.yaml
 
 services:
@@ -25,7 +24,7 @@ services:
       - "/dev/fuse:/dev/fuse"
       - "/dev/loop-control:/dev/loop-control"
     volumes:
-      - xo-data:/storage
+      - xo_data:/storage
       - acme_certs:/opt/ssl
     labels:
       - sh.acme.autoload.domain=xo
@@ -36,12 +35,12 @@ services:
     restart: unless-stopped
     command: '--appendonly yes --appendfsync everysec'
     volumes:
-      - redis-data:/data
-      - acme_certs:/opt/ssl
+      - redis_data:/data
     labels:
       - sh.acme.autoload.domain=xo
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
 volumes:
-  xo-data:
-  redis-data:
+  xo_data:
+  redis_data:
+  acme_certs:
