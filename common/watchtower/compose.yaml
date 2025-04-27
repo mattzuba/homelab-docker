@@ -4,6 +4,8 @@ services:
     restart: unless-stopped
     env_file: .env
     hostname: watchtower.${HOSTNAME:?Set the HOSTNAME .env variable}
+    healthcheck: 
+      disable: true
     environment:
       WATCHTOWER_SCOPE: ${HOSTNAME}
       WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${HOSTNAME}
