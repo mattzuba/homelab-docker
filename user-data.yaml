@@ -67,11 +67,35 @@ write_files:
       [Timer]
       OnCalendar=daily
       Persistent=true
-      RandomizedDelaySec=600
+      RandomizedDelaySec=1h
 
       [Install]
       WantedBy=timers.target
 
+  - path: /etc/systemd/system/acme.service
+    content: |
+      [Unit]
+      Description=Renew certificates using acme.sh
+      After=network-online.target nss-lookup.target
+
+      [Service]
+      Type=oneshot
+      SyslogIdentifier=acme.sh
+      Environment=AUTO_UPGRADE=1 NO_TIMESTAMP=1
+      ExecStart=/root/.acme.sh/acme.sh --cron --home /root/.acme.sh
+
+  - path: /etc/systemd/system/acme.timer
+    content: |
+      [Unit]
+      Description=Daily renewal of certificates
+
+      [Timer]
+      OnCalendar=daily
+      RandomizedDelaySec=1h
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
   # The version of cloud-init that ships with AL2023 didn't take the cloud-init.disabled file into account, this helps
   - path: /etc/systemd/system/cloud-init-local.service.d/override.conf
     content: |
@@ -93,24 +117,6 @@ write_files:
       [Unit]
       ConditionPathExists=!/etc/cloud/cloud-init.disabled
 
-  # Add docker config to wazuh agent
-  - path: /var/ossec/etc/ossec.conf
-    defer: true
-    append: true
-    permissions: 0660
-    owner: root:wazuh
-    content: |
-      
-      <ossec_config>
-        <wodle name="docker-listener">
-          <disabled>no</disabled>
-        </wodle>
-        <localfile>
-          <log_format>syslog</log_format>
-          <location>/var/lib/docker/containers/*/*-json.log</location>
-        </localfile>
-      </ossec_config>
-
 runcmd:
   # Fix rngd by excluding jitter source
   - sed -i 's/nist"/nist -x jitter"/g' /etc/sysconfig/rngd
@@ -128,15 +134,20 @@ runcmd:
   - sed -i 's/MANAGER_IP/10.0.2.6/g' /var/ossec/etc/ossec.conf
   - sed -i 's~#!/usr/bin/env python3~#!/opt/wazuh-docker/bin/python~g' /var/ossec/wodles/docker/DockerListener
   - sed -i "s/^enabled=1/enabled=0/" /etc/yum.repos.d/wazuh.repo
+  - echo wazuh_command.remote_commands=1 | tee -a /var/ossec/etc/local_internal_options.conf
 
   # Add default user to docker group
   - usermod -a -G docker admin
+
+  # Install acme.sh (no longer in Docker, more flexibility here)
+  - 'curl -sL https://get.acme.sh | PROFILE=/root/.bashrc sh -s -- force --home /root/.acme.sh --nocron'
 
   # Enable/start/disable services
   - systemctl enable wazuh-agent
   - systemctl enable docker
   - systemctl enable kpatch
   - systemctl enable dnf-upgrade.timer
+  - systemctl enable acme.timer
 
   # Disable cloud-init
   - touch /etc/cloud/cloud-init.disabled
