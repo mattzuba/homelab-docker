@@ -6,6 +6,9 @@ services:
     restart: unless-stopped
     ports:
       - "514:514/tcp"
+    volumes:
+      - ../../config/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf
+
 
   wazuh.indexer:
     restart: unless-stopped
@@ -43,6 +46,22 @@ services:
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
       - com.centurylinklabs.watchtower.monitor-only=true
+  
+  msmtpd:
+    image: ghcr.io/crazy-max/msmtpd
+    restart: unless-stopped
+    volumes:
+      - ../../config/03-create-service.sh:/etc/cont-init.d/03-create-service.sh
+    healthcheck:
+      disable: true
+    environment:
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_TLS: ${SMTP_TLS:-on}
+      SMTP_AUTH: ${SMTP_AUTH:-on}
+      SMTP_USER: ${SMTP_USER:-apikey}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}
 
 volumes:
   caddy_data:
