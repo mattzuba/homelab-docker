@@ -1,5 +1,4 @@
 include:
-  - path: ../common/acme/compose.yaml
   - path: ../common/cloudflare/compose.yaml
   - path: ../common/watchtower/compose.yaml
 
@@ -16,7 +15,6 @@ services:
       - ./ntfy.yaml:/etc/ntfy/server.yml
       - ntfy_cache:/var/cache/ntfy
       - ntfy_data:/var/lib/ntfy
-      - acme_certs:/opt/ssl
     labels:
       - sh.acme.autoload.domain=ntfy
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
