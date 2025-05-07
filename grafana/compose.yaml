@@ -1,5 +1,4 @@
 include:
-  - path: ../common/acme/compose.yaml
   - path: ../common/watchtower/compose.yaml
 
 services:
@@ -44,10 +43,21 @@ services:
     hostname: unpoller.${HOSTNAME:?Set the HOSTNAME .env variable}
     environment:
       - UP_INFLUXDB_DISABLE=true
-      - UP_UNIFI_DEFAULT_URL=https://unifi.zuba.dev:8443
+      - UP_UNIFI_DEFAULT_URL=https://10.0.2.1
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+
+  # Thanks Docker!
+  # https://pratikpc.medium.com/use-docker-compose-named-volumes-as-non-root-within-your-containers-1911eb30f731
+  grafana-ssl-vol-ownership:
+    image: busybox:latest
+    profiles:
+      - do-not-run
+    volumes:
+      - acme_certs:/opt/ssl
+    command: chown -vcR 472:0 /opt/ssl
     
 volumes:
+  acme_certs:
   grafana_storage:
   prometheus_data:
