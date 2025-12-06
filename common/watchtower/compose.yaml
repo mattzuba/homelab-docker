@@ -9,6 +9,7 @@ services:
     environment:
       WATCHTOWER_SCOPE: ${HOSTNAME}
       WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${HOSTNAME}
+      WATCHTOWER_UPDATE_ON_START: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
