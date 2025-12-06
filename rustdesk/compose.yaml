@@ -12,6 +12,8 @@ services:
     depends_on:
       - hbbr
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
   hbbr:
     container_name: hbbr
@@ -21,6 +23,8 @@ services:
       - rustdesk-data:/root
     network_mode: "host"
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
 volumes:
   rustdesk-data:
