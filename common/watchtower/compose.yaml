@@ -1,10 +1,10 @@
 services:
   watchtower:
-    image: containrrr/watchtower:latest
+    image: nickfedor/watchtower:latest
     restart: unless-stopped
     env_file: .env
     hostname: watchtower.${HOSTNAME:?Set the HOSTNAME .env variable}
-    healthcheck: 
+    healthcheck:
       disable: true
     environment:
       WATCHTOWER_SCOPE: ${HOSTNAME}
