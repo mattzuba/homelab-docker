@@ -1,0 +1,16 @@
+include:
+  - path: ../common/cloudflare/compose.yaml
+  - path: ../common/watchtower/compose.yaml
+
+services:
+  rivolt:
+    image: rivolt:latest
+    pull_policy: never
+    hostname: rivolt.${HOSTNAME:?Set the HOSTNAME .env variable}
+    env_file: .env
+    volumes:
+      - rivolt-data:/data
+    restart: unless-stopped
+
+volumes:
+  rivolt-data:
