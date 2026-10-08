@@ -6,11 +6,33 @@ services:
   rivolt:
     image: rivolt:latest
     pull_policy: never
+    restart: unless-stopped
     hostname: rivolt.${HOSTNAME:?Set the HOSTNAME .env variable}
     env_file: .env
     volumes:
       - rivolt-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+
+  postgres:
+    image: postgres:18-alpine
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-rivolt}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-rivolt}"
+      POSTGRES_DB: "${POSTGRES_DB:-rivolt}"
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - rivolt-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rivolt}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   rivolt-data:
+  rivolt-pg:
