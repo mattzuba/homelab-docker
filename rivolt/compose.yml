@@ -26,6 +26,8 @@ services:
       POSTGRES_DB: "${POSTGRES_DB:-rivolt}"
     ports:
       - "127.0.0.1:5432:5432"
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     volumes:
       - rivolt-pg:/var/lib/postgresql/data
     healthcheck:
