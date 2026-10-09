@@ -7,7 +7,6 @@ This is a Docker Compose setup for [Rivolt](https://github.com/apohor/rivolt) wi
 * Cloudflare account
 * A running Pocket ID instance (see ../pocketid)
 * An Anthropic API key
-* The `rivolt:latest` image built locally (`docker build -t rivolt:latest .` in a clone of the Rivolt repo)
 
 ## Instructions
 
@@ -25,4 +24,4 @@ This is a Docker Compose setup for [Rivolt](https://github.com/apohor/rivolt) wi
 
 * The provider slug (`pocketid`) is used in the env var names and the callback path; the redirect URL must match what is registered in Pocket ID exactly.
 * Rivolt requests `openid email profile`. Users need an email on their Pocket ID account; identity is keyed on a verified email, otherwise issuer+sub.
-* Watchtower is not scoped to Rivolt since the image is built locally.
+* The image is pulled from `ghcr.io/apohor/rivolt:latest`, which Rivolt's CI retags on each `vX.Y.Z` release (amd64 only). Watchtower keeps it up to date.
