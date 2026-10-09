@@ -4,13 +4,14 @@ include:
 
 services:
   rivolt:
-    image: rivolt:latest
-    pull_policy: never
+    image: ghcr.io/apohor/rivolt:latest
     restart: unless-stopped
     hostname: rivolt.${HOSTNAME:?Set the HOSTNAME .env variable}
     env_file: .env
     volumes:
       - rivolt-data:/data
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     depends_on:
       postgres:
         condition: service_healthy
