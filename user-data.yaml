@@ -23,15 +23,10 @@ yum_repos:
     baseurl: https://download.docker.com/linux/centos/9/$basearch/stable
     gpgcheck: 1
     gpgkey: https://download.docker.com/linux/centos/gpg
-  wazuh:
-    name: Wazuh
-    baseurl: https://packages.wazuh.com/4.x/yum
-    gpgcheck: 1
-    gpgkey: https://packages.wazuh.com/key/GPG-KEY-WAZUH
 
 package_update: true
 packages:
-  - https://github.com/xenserver/xe-guest-utilities/releases/download/v8.4.0/xe-guest-utilities-8.4.0-1.x86_64.rpm
+  - https://github.com/xenserver/xe-guest-utilities/releases/download/v10.0.0/xe-guest-utilities-10.0.0-1.x86_64.rpm
   - docker-ce
   - docker-ce-cli
   - containerd.io
@@ -39,7 +34,6 @@ packages:
   - docker-compose-plugin
   - kpatch-dnf
   - kpatch-runtime
-  - wazuh-agent
   - git
 
 write_files:
@@ -49,15 +43,56 @@ write_files:
     content: |
       GSSAPIAuthentication no
 
-  # Create a mechanism for auto updates that will run nightly
+  - path: /usr/local/bin/check-reboot-livepatch.sh
+    permissions: 0755
+    content: |
+      #!/bin/bash
+      TAG="update-script"
+      
+      logger -t $TAG "Starting post-upgrade maintenance check."
+
+      # 1. Check Kernel First: Is live-patching support no longer available?
+      # If the output indicates a reboot is needed, we exit immediately.
+      if dnf kernel-livepatch support | grep -q "Reboot into the latest kernel"; then
+          logger -t $TAG "CRITICAL: Live-patching window expired. Rebooting in 60s. Skipping service restarts."
+          /usr/sbin/shutdown -r +1 "Kernel live-patching window expired"
+          exit 0
+      fi
+
+      logger -t $TAG "Kernel $(uname -r) still has live-patch support. Checking userspace services..."
+
+      # 2. Restart services using outdated libraries
+      # This only runs if the reboot check above didn't trigger an exit.
+      SERVICES=$(/usr/bin/needs-restarting -s)
+      if [ -n "$SERVICES" ]; then
+          for SERVICE in $SERVICES; do
+              # Skip critical infra services to prevent session/bus drops
+              if [[ "$SERVICE" == "dbus.service" || "$SERVICE" == "systemd-logind.service" ]]; then
+                  logger -t $TAG "Skipping restart of protected service: $SERVICE"
+                  continue
+              fi
+              logger -t $TAG "Restarting service to apply updates: $SERVICE"
+              systemctl restart "$SERVICE"
+          done
+      else
+          logger -t $TAG "No userspace services require restarting."
+      fi
+
+      logger -t $TAG "Maintenance check complete."
+
   - path: /etc/systemd/system/dnf-upgrade.service
     content: |
       [Unit]
-      Description=Automatic upgrades for dnf packages
+      Description=Live-patch aware automatic upgrades
+      After=network-online.target
 
       [Service]
       Type=oneshot
+      # Ensure required tools are installed (dnf-utils provides needs-restarting)
+      ExecStartPre=/usr/bin/dnf install -y dnf-utils binutils
       ExecStart=/usr/bin/dnf upgrade --assumeyes --releasever=latest
+      # Execute the optimized reboot-first logic
+      ExecStartPost=/usr/local/bin/check-reboot-livepatch.sh
 
   - path: /etc/systemd/system/dnf-upgrade.timer
     content: |
@@ -128,14 +163,6 @@ runcmd:
   # Remove stuff not needed
   - dnf remove -y amazon-ssm-agent
 
-  # Configure Wazuh
-  - python3 -m venv --upgrade-deps /opt/wazuh-docker
-  - /opt/wazuh-docker/bin/pip install docker urllib3 requests
-  - sed -i 's/MANAGER_IP/10.0.2.6/g' /var/ossec/etc/ossec.conf
-  - sed -i 's~#!/usr/bin/env python3~#!/opt/wazuh-docker/bin/python~g' /var/ossec/wodles/docker/DockerListener
-  - sed -i "s/^enabled=1/enabled=0/" /etc/yum.repos.d/wazuh.repo
-  - echo wazuh_command.remote_commands=1 | tee -a /var/ossec/etc/local_internal_options.conf
-
   # Add default user to docker group
   - usermod -a -G docker admin
 
@@ -143,7 +170,6 @@ runcmd:
   - 'curl -sL https://get.acme.sh | PROFILE=/root/.bashrc sh -s -- force --home /root/.acme.sh --nocron'
 
   # Enable/start/disable services
-  - systemctl enable wazuh-agent
   - systemctl enable docker
   - systemctl enable kpatch
   - systemctl enable dnf-upgrade.timer
