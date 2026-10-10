@@ -1,3 +1,4 @@
 .env
 cloudflared.yaml
 compose.override.yaml
+/.idea
