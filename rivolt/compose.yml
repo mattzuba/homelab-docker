@@ -29,7 +29,7 @@ services:
     labels:
       - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     volumes:
-      - rivolt-pg:/var/lib/postgresql/data
+      - rivolt-pg:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rivolt}"]
       interval: 5s
