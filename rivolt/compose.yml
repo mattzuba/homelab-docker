@@ -16,6 +16,18 @@ services:
       postgres:
         condition: service_healthy
         required: false
+      redis:
+        condition: service_started
+        required: false
+
+  redis:
+    image: valkey/valkey:9-alpine
+    restart: unless-stopped
+    command: '--appendonly yes --appendfsync everysec'
+    volumes:
+      - rivolt-redis:/data
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
 
   postgres:
     image: postgres:18-alpine
@@ -39,3 +51,4 @@ services:
 volumes:
   rivolt-data:
   rivolt-pg:
+  rivolt-redis:
