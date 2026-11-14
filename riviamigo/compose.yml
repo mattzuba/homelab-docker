@@ -40,11 +40,9 @@ services:
       start_period: 120s
 
   # The service names `timescaledb` and `redis` are the hostnames Riviamigo
-  # builds its connection URLs from; don't rename them. Both images are pinned
-  # to what upstream's compose/docker-compose.yml ships and carry no Watchtower
-  # label, so they only change when the pins here are bumped.
+  # builds its connection URLs from; don't rename them.
   timescaledb:
-    image: timescale/timescaledb:2.28.3-pg18@sha256:2c718e700b1c75b93488085596f2254c991c3aa29584fc282ebbe62fd8335791
+    image: timescale/timescaledb:latest-pg18
     restart: unless-stopped
     environment:
       POSTGRES_DB: riviamigo
@@ -55,6 +53,8 @@ services:
       - internal
     volumes:
       - riviamigo-db:/db
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-riviamigo} -d riviamigo"]
       interval: 10s
@@ -63,10 +63,10 @@ services:
       start_period: 300s
 
   redis:
-    image: redis:8.8.0-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
+    image: valkey/valkey:latest
     restart: unless-stopped
     command:
-      - redis-server
+      - valkey-server
       - --requirepass
       - ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
       - --appendonly
@@ -82,8 +82,10 @@ services:
       - internal
     volumes:
       - riviamigo-redis:/data
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping"]
       interval: 10s
       timeout: 5s
       retries: 30
