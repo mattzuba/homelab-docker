@@ -1,0 +1,102 @@
+include:
+  - path: ../common/cloudflare/compose.yaml
+  - path: ../common/watchtower/compose.yaml
+
+services:
+  # Unified app container (API, web app, nginx origin on :8080, backup tools).
+  # No host port is published; cloudflared reaches it over the default network.
+  riviamigo:
+    image: ghcr.io/bballdavis/riviamigo:latest
+    restart: unless-stopped
+    hostname: riviamigo.${HOSTNAME:?Set the HOSTNAME .env variable}
+    env_file: .env
+    # Upstream hardening; the image is built to run this way.
+    user: "1001:1001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m
+    networks:
+      - default
+      - internal
+    volumes:
+      - riviamigo-backups:/backups
+      - riviamigo-cache:/data/cache
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+  # The service names `timescaledb` and `redis` are the hostnames Riviamigo
+  # builds its connection URLs from; don't rename them.
+  timescaledb:
+    image: timescale/timescaledb:latest-pg18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: riviamigo
+      POSTGRES_USER: ${POSTGRES_USER:-riviamigo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      PGDATA: /db
+    networks:
+      - internal
+    volumes:
+      - riviamigo-db:/db
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-riviamigo} -d riviamigo"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 300s
+
+  redis:
+    image: valkey/valkey:latest
+    restart: unless-stopped
+    command:
+      - valkey-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 192mb
+      - --maxmemory-policy
+      - noeviction
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    mem_limit: 256M
+    networks:
+      - internal
+    volumes:
+      - riviamigo-redis:/data
+    labels:
+      - com.centurylinklabs.watchtower.scope=${HOSTNAME}
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  riviamigo-db:
+  riviamigo-redis:
+  riviamigo-backups:
+  riviamigo-cache:
+
+networks:
+  # Database and Redis are only reachable from the app, with no route out.
+  internal:
+    internal: true
